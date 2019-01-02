@@ -28,4 +28,5 @@ dependencies {
 
     //Sendbird SDK
     implementation 'com.sendbird.sdk:sendbird-android-sdk:3.0.83'
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
 }
