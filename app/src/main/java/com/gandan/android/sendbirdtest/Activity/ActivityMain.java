@@ -1,5 +1,7 @@
-package com.gandan.android.sendbirdtest;
+package com.gandan.android.sendbirdtest.Activity;
 
+import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +13,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.gandan.android.sendbirdtest.Adapter.ChannelRecyclerAdapter;
+import com.gandan.android.sendbirdtest.Dialog.MakeChatDialog;
+import com.gandan.android.sendbirdtest.R;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.GroupChannelListQuery;
@@ -20,18 +24,19 @@ import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
 import com.sendbird.android.User;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityMain extends AppCompatActivity {
 
     EditText nameEditText;
-    Button editNameBtn;
-    List<GroupChannel> groupChannelList;
-    List<OpenChannel> openChannelList;
+    Button editNameBtn, makeOpenChatBtn, makeGroupChatBtn;
+    List<BaseChannel> channelList = new ArrayList<>();
     ChannelRecyclerAdapter channelRecyclerAdapter;
     RecyclerView channelRecyclerView;
+    User connectUser;
+    MakeChatDialog makeChatDialog;
+    SwipeRefreshLayout swipeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +45,12 @@ public class ActivityMain extends AppCompatActivity {
 
         channelRecyclerView = findViewById(R.id.channelRecyclerView);
 
+        makeOpenChatBtn = findViewById(R.id.makeOpenChatBtn);
+        makeGroupChatBtn = findViewById(R.id.makeGroupChatBtn);
+
         SendBird.init(getString(R.string.sendbird_app_id), this);
+
+        makeChatDialog = new MakeChatDialog(ActivityMain.this);
 
         nameEditText = findViewById(R.id.nameEditText);
         if("".equals(nameEditText.getText().toString())) {
@@ -56,25 +66,84 @@ public class ActivityMain extends AppCompatActivity {
                 if(nameEditText.isEnabled()){
                     nameEditText.setEnabled(false);
                     connectSendBird(nameEditText.getText().toString());
+                    getGroupChannelList();
                 } else {
                     nameEditText.setEnabled(true);
                 }
             }
         });
 
+        swipeList = findViewById(R.id.swipeList);
+        if(swipeList.isRefreshing()){
+            swipeList.setEnabled(false);
+        }
+
+        swipeList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getGroupChannelList();
+            }
+        });
+
+
+
+        makeGroupChatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                makeChatDialog.setOnConfirmClickListener(new MakeChatDialog.OnConfirmClickListener() {
+                    @Override
+                    public void onConfirm(String roomName) {
+                        makeGroupChannel(connectUser, roomName, null);
+                        makeChatDialog.dismiss();
+                    }
+                });
+                makeChatDialog.show();
+            }
+        });
+
+        makeOpenChatBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makeChatDialog.setOnConfirmClickListener(new MakeChatDialog.OnConfirmClickListener() {
+                    @Override
+                    public void onConfirm(String roomName) {
+                        makeOpenChannel(connectUser, roomName, null);
+                        makeChatDialog.dismiss();
+                    }
+                });
+                makeChatDialog.show();
+            }
+        });
+
 
     }
 
-    private void makeGroupChannel(User user){
+    private void makeOpenChannel(User user, String roomName, @Nullable String coverImage){
         List<User> userList = new ArrayList<>();
         userList.add(user);
-        GroupChannel.createChannel(userList, false, "Hello Group", null, null, null, new GroupChannel.GroupChannelCreateHandler() {
+        OpenChannel.createChannel(roomName, null, null, null, userList, new OpenChannel.OpenChannelCreateHandler() {
+            @Override
+            public void onResult(OpenChannel openChannel, SendBirdException e) {
+                if( e == null){
+                    getGroupChannelList();
+                } else {
+                    Log.e("makeOpenErr", e.getMessage()+"");
+                }
+            }
+        });
+    }
+
+    private void makeGroupChannel(User user, String roomName, @Nullable String coverImage){
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        GroupChannel.createChannel(userList, false, roomName, coverImage, null, null, new GroupChannel.GroupChannelCreateHandler() {
             @Override
             public void onResult(GroupChannel groupChannel, SendBirdException e) {
                 if( e == null){
                     getGroupChannelList();
                 } else {
-                    Log.e("makeError", e.getMessage()+"");
+                    Log.e("makeGroupErr", e.getMessage()+"");
                 }
             }
         });
@@ -86,7 +155,7 @@ public class ActivityMain extends AppCompatActivity {
             public void onConnected(User user, SendBirdException e) {
                 if( e == null) {
                     Toast.makeText(ActivityMain.this, user.getUserId() + "", Toast.LENGTH_SHORT).show();
-                    makeGroupChannel(user);
+                    connectUser = user;
                 } else {
                     Log.e("SendBirdError", e.getMessage()+"");
                 }
@@ -95,13 +164,16 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void getGroupChannelList(){
+        channelList.clear();
         GroupChannelListQuery groupChannelListQuery = GroupChannel.createMyGroupChannelListQuery();
         groupChannelListQuery.setIncludeEmpty(true);
         groupChannelListQuery.next(new GroupChannelListQuery.GroupChannelListQueryResultHandler() {
             @Override
             public void onResult(List<GroupChannel> list, SendBirdException e) {
                 if (e == null){
-                    groupChannelList = list;
+                    if(list.size() > 0) {
+                        channelList.addAll(list);
+                    }
                     getOpenChannelList();
                 } else {
                     Log.e("GroupError", e.getMessage()+"");
@@ -116,7 +188,9 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onResult(List<OpenChannel> list, SendBirdException e) {
                 if( e == null){
-                    openChannelList = list;
+                    if(list.size() > 0) {
+                        channelList.addAll(list);
+                    }
                     setRecyclerView();
                 } else {
                     Log.e("OpenError", e.getMessage()+"");
@@ -126,10 +200,13 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setRecyclerView(){
-        channelRecyclerAdapter = new ChannelRecyclerAdapter(this, groupChannelList, openChannelList);
+        channelRecyclerAdapter = new ChannelRecyclerAdapter(this, channelList);
         channelRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         channelRecyclerView.setAdapter(channelRecyclerAdapter);
         channelRecyclerAdapter.notifyDataSetChanged();
+        if(swipeList.isRefreshing()){
+            swipeList.setRefreshing(false);
+        }
     }
 
 

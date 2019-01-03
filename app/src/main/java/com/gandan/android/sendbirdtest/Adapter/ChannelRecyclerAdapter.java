@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.sendbird.android.BaseChannel;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.OpenChannel;
 
@@ -19,6 +20,7 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
     Context context;
     List<GroupChannel> groupChannelList;
     List<OpenChannel> openChannelList;
+    List<BaseChannel> baseChannelList;
     int size = 0;
 
     public ChannelRecyclerAdapter(Context context, List<GroupChannel> groupChannelList, List<OpenChannel> openChannelList){
@@ -26,6 +28,12 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
         this.groupChannelList = groupChannelList;
         this.openChannelList = openChannelList;
         this.size = groupChannelList.size() + openChannelList.size();
+    }
+
+    public ChannelRecyclerAdapter(Context context, List<BaseChannel> baseChannelList){
+        this.context = context;
+        this.baseChannelList = baseChannelList;
+        this.size = baseChannelList.size();
     }
 
 
@@ -38,7 +46,7 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
 
     @Override
     public void onBindViewHolder(@NonNull ChannelRecyclerHolder holder, int position) {
-        if(position >= groupChannelList.size()){
+        /*if(position >= groupChannelList.size()){
             final OpenChannel openChannel = openChannelList.get(position - groupChannelList.size());
             holder.text1.setText(openChannel.getName());
             holder.text1.setOnClickListener(new View.OnClickListener() {
@@ -56,7 +64,15 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
                     Toast.makeText(context, groupChannel.getCreatedAt()+"", Toast.LENGTH_SHORT).show();
                 }
             });
-        }
+        }*/
+        final BaseChannel baseChannel = baseChannelList.get(position);
+        holder.text1.setText(baseChannel.getName());
+        holder.text1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, baseChannel.getCreatedAt()+"", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
