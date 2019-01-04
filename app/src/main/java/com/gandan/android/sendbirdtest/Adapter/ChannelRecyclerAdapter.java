@@ -1,6 +1,7 @@
 package com.gandan.android.sendbirdtest.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gandan.android.sendbirdtest.Activity.ActivityChat;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.OpenChannel;
@@ -21,6 +23,7 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
     List<GroupChannel> groupChannelList;
     List<OpenChannel> openChannelList;
     List<BaseChannel> baseChannelList;
+    String userId = "";
     int size = 0;
 
     public ChannelRecyclerAdapter(Context context, List<GroupChannel> groupChannelList, List<OpenChannel> openChannelList){
@@ -30,10 +33,11 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
         this.size = groupChannelList.size() + openChannelList.size();
     }
 
-    public ChannelRecyclerAdapter(Context context, List<BaseChannel> baseChannelList){
+    public ChannelRecyclerAdapter(Context context, List<BaseChannel> baseChannelList, String userId){
         this.context = context;
         this.baseChannelList = baseChannelList;
         this.size = baseChannelList.size();
+        this.userId = userId;
     }
 
 
@@ -70,7 +74,21 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
         holder.text1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, baseChannel.getCreatedAt()+"", Toast.LENGTH_SHORT).show();
+                if(baseChannel.isOpenChannel()){
+                    Intent intent = new Intent(context, ActivityChat.class);
+                    intent.putExtra("type", "open");
+                    intent.putExtra("chatUrl", baseChannel.getUrl()+"");
+                    intent.putExtra("userId", userId);
+                    context.startActivity(intent);
+                } else if (baseChannel.isGroupChannel()){
+                    Intent intent = new Intent(context, ActivityChat.class);
+                    intent.putExtra("type", "group");
+                    intent.putExtra("chatUrl", baseChannel.getUrl()+"");
+                    intent.putExtra("userId", userId);
+                    context.startActivity(intent);
+                } else {
+                    Toast.makeText(context, "What the...?!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
