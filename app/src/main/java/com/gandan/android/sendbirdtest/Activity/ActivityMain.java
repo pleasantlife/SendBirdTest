@@ -200,7 +200,7 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setRecyclerView(){
-        channelRecyclerAdapter = new ChannelRecyclerAdapter(this, channelList);
+        channelRecyclerAdapter = new ChannelRecyclerAdapter(this, channelList, connectUser.getUserId());
         channelRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         channelRecyclerView.setAdapter(channelRecyclerAdapter);
         channelRecyclerAdapter.notifyDataSetChanged();

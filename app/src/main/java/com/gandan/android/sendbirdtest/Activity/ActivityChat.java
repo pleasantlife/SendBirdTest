@@ -58,16 +58,19 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
         sendBtn.setOnClickListener(this);
         msgEditText = findViewById(R.id.msgEditText);
 
-        SendBird.connect(userId, new SendBird.ConnectHandler() {
+        /*SendBird.connect(userId, new SendBird.ConnectHandler() {
             @Override
             public void onConnected(User user, SendBirdException e) {
                 if( e == null ){
-                    
+
                 } else {
                     Log.e("e", e.getMessage()+"");
                 }
             }
-        });
+        });*/
+
+        Log.e("type", type+"");
+        Log.e("chatUrl", chatUrl+"");
 
         if(!"".equals(type) && !"".equals(chatUrl)){
             switch(type){
@@ -92,7 +95,8 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                         public void onResult(GroupChannel groupChannel, SendBirdException e) {
                             if( e == null){
                                 baseChannel = groupChannel;
-                                Toast.makeText(ActivityChat.this, "Connected GroupChat", Toast.LENGTH_SHORT).show();
+
+                                Toast.makeText(ActivityChat.this, groupChannel.getLastMessage().getChannelUrl()+"", Toast.LENGTH_SHORT).show();
                                 actionBar.setTitle(groupChannel.getName());
                                 loadMessages();
                             } else {
@@ -112,10 +116,14 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
         previousMessageListQuery.load(30, true, new PreviousMessageListQuery.MessageListQueryResult() {
             @Override
             public void onResult(List<BaseMessage> list, SendBirdException e) {
-                for(BaseMessage msg : list){
-                    messageList.add(msg);
+                if(e == null) {
+                    for (BaseMessage msg : list) {
+                        messageList.add(msg);
+                    }
+                    chatRecyclerAdapter.notifyDataSetChanged();
+                } else {
+                    Log.e("loadError", e.getMessage()+"");
                 }
-                chatRecyclerAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -129,6 +137,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                     public void onSent(UserMessage userMessage, SendBirdException e) {
                         if(e == null){
                             loadMessages();
+                            Toast.makeText(ActivityChat.this, "Sended!", Toast.LENGTH_SHORT).show();
                         } else {
                             Log.e("E", e.getMessage()+"");
                         }

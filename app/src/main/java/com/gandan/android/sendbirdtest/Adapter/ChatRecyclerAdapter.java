@@ -3,13 +3,17 @@ package com.gandan.android.sendbirdtest.Adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.gandan.android.sendbirdtest.R;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
+import com.sendbird.android.BaseMessageParams;
+import com.sendbird.android.UserMessage;
 
 import java.util.List;
 
@@ -26,14 +30,17 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     @NonNull
     @Override
     public ChatHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_item, parent, false);
         return new ChatHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ChatHolder holder, int position) {
         BaseMessage baseMessage = baseMessageList.get(position);
-        holder.text1.setText(baseMessage.getData()+"");
+        if(baseMessage.getMentionType().equals(BaseMessageParams.MentionType.USERS)){
+            UserMessage msg = (UserMessage) baseMessage;
+            holder.chatTxtView.setText(msg.getMessage()+"");
+        }
     }
 
     @Override
@@ -43,11 +50,11 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
     class ChatHolder extends RecyclerView.ViewHolder {
 
-        TextView text1;
+        TextView chatTxtView;
 
         public ChatHolder(View itemView) {
             super(itemView);
-            text1 = itemView.findViewById(android.R.id.text1);
+            chatTxtView = itemView.findViewById(R.id.chatTxtView);
         }
     }
 }
