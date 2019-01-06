@@ -15,6 +15,7 @@ import com.sendbird.android.BaseMessage;
 import com.sendbird.android.BaseMessageParams;
 import com.sendbird.android.UserMessage;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapter.ChatHolder> {
@@ -36,11 +37,9 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ChatHolder holder, int position) {
-        BaseMessage baseMessage = baseMessageList.get(position);
-        if(baseMessage.getMentionType().equals(BaseMessageParams.MentionType.USERS)){
-            UserMessage msg = (UserMessage) baseMessage;
-            holder.chatTxtView.setText(msg.getMessage()+"");
-        }
+        UserMessage message = (UserMessage) baseMessageList.get(position);
+        holder.chatTxtView.setText(message.getMessage()+"");
+        holder.chatTimeTxtView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(message.getCreatedAt()));
     }
 
     @Override
@@ -50,11 +49,12 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
     class ChatHolder extends RecyclerView.ViewHolder {
 
-        TextView chatTxtView;
+        TextView chatTxtView, chatTimeTxtView;
 
         public ChatHolder(View itemView) {
             super(itemView);
             chatTxtView = itemView.findViewById(R.id.chatTxtView);
+            chatTimeTxtView = itemView.findViewById(R.id.chatTImeTxtView);
         }
     }
 }

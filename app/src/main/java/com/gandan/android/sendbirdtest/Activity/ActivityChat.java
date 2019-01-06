@@ -39,6 +39,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
     Button sendBtn;
     EditText msgEditText;
     String userId = "";
+    LinearLayoutManager linearLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +52,22 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
         userId = getIntent().getStringExtra("userId");
         actionBar = getSupportActionBar();
         chatRecycler = findViewById(R.id.chatRecycler);
-        chatRecycler.setLayoutManager(new LinearLayoutManager(this));
+        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true);
+        chatRecycler.setLayoutManager(linearLayoutManager);
         chatRecyclerAdapter = new ChatRecyclerAdapter(this, messageList);
         chatRecycler.setAdapter(chatRecyclerAdapter);
         sendBtn = findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(this);
         msgEditText = findViewById(R.id.msgEditText);
+
+        chatRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == messageList.size()-1){
+                    loadMessages();
+                }
+            }
+        });
 
         /*SendBird.connect(userId, new SendBird.ConnectHandler() {
             @Override
@@ -69,20 +80,31 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
             }
         });*/
 
-        Log.e("type", type+"");
+                Log.e("type", type + "");
         Log.e("chatUrl", chatUrl+"");
 
         if(!"".equals(type) && !"".equals(chatUrl)){
+            Log.e("type", type+"");
             switch(type){
                 case "open":
                     OpenChannel.getChannel(chatUrl, new OpenChannel.OpenChannelGetHandler() {
                         @Override
-                        public void onResult(OpenChannel openChannel, SendBirdException e) {
+                        public void onResult(final OpenChannel openChannel, SendBirdException e) {
                             if( e == null){
-                                baseChannel = openChannel;
-                                Toast.makeText(ActivityChat.this, "Connected OpenChat", Toast.LENGTH_SHORT).show();
-                                actionBar.setTitle(openChannel.getName());
-                                loadMessages();
+                                openChannel.enter(new OpenChannel.OpenChannelEnterHandler() {
+                                    @Override
+                                    public void onResult(SendBirdException e) {
+                                        if(e == null){
+                                            baseChannel = openChannel;
+                                            Toast.makeText(ActivityChat.this, "Connected OpenChat", Toast.LENGTH_SHORT).show();
+                                            actionBar.setTitle(baseChannel.getName());
+                                            loadMessages();
+                                        } else {
+                                            Log.e("Err on open", e.getMessage()+"");
+                                        }
+                                    }
+                                });
+
                             } else {
                                 Log.e("error enterOpen", e.getMessage()+"");
                             }
@@ -112,20 +134,37 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadMessages(){
-        PreviousMessageListQuery previousMessageListQuery = baseChannel.createPreviousMessageListQuery();
-        previousMessageListQuery.load(30, true, new PreviousMessageListQuery.MessageListQueryResult() {
-            @Override
-            public void onResult(List<BaseMessage> list, SendBirdException e) {
-                if(e == null) {
-                    for (BaseMessage msg : list) {
-                        messageList.add(msg);
+        if(messageList.size() == 0) {
+            PreviousMessageListQuery previousMessageListQuery = baseChannel.createPreviousMessageListQuery();
+            previousMessageListQuery.load(5, true, new PreviousMessageListQuery.MessageListQueryResult() {
+                @Override
+                public void onResult(List<BaseMessage> list, SendBirdException e) {
+                    if (e == null) {
+                        for (BaseMessage msg : list) {
+                            messageList.add(msg);
+                        }
+                        Log.e("messageSIze", messageList.size()+"");
+                        chatRecyclerAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.e("loadError", e.getMessage() + "");
                     }
-                    chatRecyclerAdapter.notifyDataSetChanged();
-                } else {
-                    Log.e("loadError", e.getMessage()+"");
                 }
-            }
-        });
+            });
+        } else {
+            baseChannel.getPreviousMessagesByTimestamp(messageList.get(messageList.size()-1).getCreatedAt(), false, 1, true, BaseChannel.MessageTypeFilter.ALL, null, new BaseChannel.GetMessagesHandler() {
+                @Override
+                public void onResult(List<BaseMessage> list, SendBirdException e) {
+                    if (e == null) {
+                        for (BaseMessage msg : list) {
+                            messageList.add(msg);
+                        }
+                        chatRecyclerAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.e("loadERR", e.getMessage()+"");
+                    }
+                }
+            });
+        }
     }
 
     @Override
