@@ -64,7 +64,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == messageList.size()-1){
-                    loadMessages();
+                    loadPreviousMessages();
                 }
             }
         });
@@ -118,7 +118,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                             if( e == null){
                                 baseChannel = groupChannel;
 
-                                Toast.makeText(ActivityChat.this, groupChannel.getLastMessage().getChannelUrl()+"", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ActivityChat.this, groupChannel.getMemberCount()+"", Toast.LENGTH_SHORT).show();
                                 actionBar.setTitle(groupChannel.getName());
                                 loadMessages();
                             } else {
@@ -134,14 +134,13 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
     }
 
     private void loadMessages(){
-        if(messageList.size() == 0) {
-            PreviousMessageListQuery previousMessageListQuery = baseChannel.createPreviousMessageListQuery();
-            previousMessageListQuery.load(5, true, new PreviousMessageListQuery.MessageListQueryResult() {
-                @Override
-                public void onResult(List<BaseMessage> list, SendBirdException e) {
-                    if (e == null) {
-                        for (BaseMessage msg : list) {
-                            messageList.add(msg);
+        PreviousMessageListQuery previousMessageListQuery = baseChannel.createPreviousMessageListQuery();
+        previousMessageListQuery.load(5, true, new PreviousMessageListQuery.MessageListQueryResult() {
+            @Override
+            public void onResult(List<BaseMessage> list, SendBirdException e) {
+                if (e == null) {
+                    for (BaseMessage msg : list) {
+                        messageList.add(msg);
                         }
                         Log.e("messageSIze", messageList.size()+"");
                         chatRecyclerAdapter.notifyDataSetChanged();
@@ -150,22 +149,36 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                     }
                 }
             });
-        } else {
-            baseChannel.getPreviousMessagesByTimestamp(messageList.get(messageList.size()-1).getCreatedAt(), false, 1, true, BaseChannel.MessageTypeFilter.ALL, null, new BaseChannel.GetMessagesHandler() {
-                @Override
-                public void onResult(List<BaseMessage> list, SendBirdException e) {
-                    if (e == null) {
-                        for (BaseMessage msg : list) {
-                            messageList.add(msg);
-                        }
-                        chatRecyclerAdapter.notifyDataSetChanged();
-                    } else {
-                        Log.e("loadERR", e.getMessage()+"");
-                    }
-                }
-            });
-        }
     }
+
+    private void loadPreviousMessages() {
+        UserMessage ms = (UserMessage) messageList.get(0);
+        Log.e("messageTime", ms.getMessage()+"");
+        baseChannel.getPreviousMessagesByTimestamp(messageList.get(0).getCreatedAt(), false, 1, true, BaseChannel.MessageTypeFilter.ALL, null, new BaseChannel.GetMessagesHandler() {
+            @Override
+            public void onResult(List<BaseMessage> list, SendBirdException e) {
+                if (e == null) {
+                    for (BaseMessage msg : list) {
+                        messageList.add(msg);
+                    }
+                    chatRecyclerAdapter.notifyDataSetChanged();
+                } else {
+                    Log.e("loadERR", e.getMessage()+"");
+                }
+            }
+        });
+    }
+
+    private void newMessage(){
+        SendBird.addChannelHandler("test", new SendBird.ChannelHandler() {
+            @Override
+            public void onMessageReceived(BaseChannel baseChannel, BaseMessage baseMessage) {
+                messageList.add(baseMessage);
+                chatRecyclerAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -175,7 +188,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onSent(UserMessage userMessage, SendBirdException e) {
                         if(e == null){
-                            loadMessages();
+                            newMessage();
                             Toast.makeText(ActivityChat.this, "Sended!", Toast.LENGTH_SHORT).show();
                         } else {
                             Log.e("E", e.getMessage()+"");
