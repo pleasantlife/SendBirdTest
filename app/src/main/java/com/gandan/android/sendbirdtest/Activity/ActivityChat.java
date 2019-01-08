@@ -117,7 +117,6 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                         public void onResult(GroupChannel groupChannel, SendBirdException e) {
                             if( e == null){
                                 baseChannel = groupChannel;
-
                                 Toast.makeText(ActivityChat.this, groupChannel.getMemberCount()+"", Toast.LENGTH_SHORT).show();
                                 actionBar.setTitle(groupChannel.getName());
                                 loadMessages();
@@ -170,11 +169,17 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
     }
 
     private void newMessage(){
-        SendBird.addChannelHandler("test", new SendBird.ChannelHandler() {
+        baseChannel.getNextMessagesByTimestamp(messageList.get(0).getCreatedAt(), false, 1, true, BaseChannel.MessageTypeFilter.ALL, null, new BaseChannel.GetMessagesHandler() {
             @Override
-            public void onMessageReceived(BaseChannel baseChannel, BaseMessage baseMessage) {
-                messageList.add(baseMessage);
-                chatRecyclerAdapter.notifyDataSetChanged();
+            public void onResult(List<BaseMessage> list, SendBirdException e) {
+                if (e == null){
+                    for ( BaseMessage msg : list){
+                        messageList.add(0, msg);
+                    }
+                    chatRecyclerAdapter.notifyDataSetChanged();
+                } else {
+                    Log.e("newE", e.getMessage()+"");
+                }
             }
         });
     }
