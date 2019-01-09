@@ -50,25 +50,6 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
 
     @Override
     public void onBindViewHolder(@NonNull ChannelRecyclerHolder holder, int position) {
-        /*if(position >= groupChannelList.size()){
-            final OpenChannel openChannel = openChannelList.get(position - groupChannelList.size());
-            holder.text1.setText(openChannel.getName());
-            holder.text1.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(context, openChannel.getCreatedAt()+"", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            final GroupChannel groupChannel = groupChannelList.get(position);
-            holder.text1.setText(groupChannel.getName());
-            holder.text1.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(context, groupChannel.getCreatedAt()+"", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }*/
         final BaseChannel baseChannel = baseChannelList.get(position);
         holder.text1.setText(baseChannel.getName());
         holder.text1.setOnClickListener(new View.OnClickListener() {

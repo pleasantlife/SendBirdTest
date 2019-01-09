@@ -38,8 +38,15 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull ChatHolder holder, int position) {
         UserMessage message = (UserMessage) baseMessageList.get(position);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         holder.chatTxtView.setText(message.getMessage()+"");
-        holder.chatTimeTxtView.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(message.getCreatedAt()));
+        holder.chatTimeTxtView.setText(sdf.format(message.getCreatedAt()));
+        if(position > 0) {
+            UserMessage beforeMessage = (UserMessage) baseMessageList.get(position-1);
+            if(sdf.format(beforeMessage.getCreatedAt()).equals(sdf.format(message.getCreatedAt()))){
+                holder.chatTimeTxtView.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
