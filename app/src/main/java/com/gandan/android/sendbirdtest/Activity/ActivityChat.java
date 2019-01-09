@@ -1,5 +1,7 @@
 package com.gandan.android.sendbirdtest.Activity;
 
+import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +22,7 @@ import com.sendbird.android.BaseChannel;
 import com.sendbird.android.BaseMessage;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.OpenChannel;
+import com.sendbird.android.ParticipantListQuery;
 import com.sendbird.android.PreviousMessageListQuery;
 import com.sendbird.android.SendBirdException;
 import com.sendbird.android.UserMessage;
@@ -65,7 +68,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
         chatRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == messageList.size()-1 && !isLoading){
+                if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == messageList.size()-1 && !isLoading && messageList.size() > 0){
                     isLoading = true;
                     loadPreviousMessages(messageList.size()-1);
                 }
@@ -207,10 +210,47 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.chatOutMenu:
-                Toast.makeText(ActivityChat.this, "Go Out!", Toast.LENGTH_SHORT).show();
+                exitChat();
+                return true;
+            case R.id.chatMemberMenu:
+                goMemberMenu();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    private void exitChat(){
+        switch(type){
+            case "open":
+                OpenChannel.getChannel(chatUrl, new OpenChannel.OpenChannelGetHandler() {
+                    @Override
+                    public void onResult(OpenChannel openChannel, SendBirdException e) {
+                        if(e != null){
+                            Log.e("err", e.getMessage()+"");
+                        }
+
+                        openChannel.exit(new OpenChannel.OpenChannelExitHandler() {
+                            @Override
+                            public void onResult(SendBirdException e) {
+                                if( e == null){
+                                    Toast.makeText(getApplicationContext(), "Exit!", Toast.LENGTH_SHORT).show();
+                                    onBackPressed();
+                                } else {
+                                    Log.e("Error", e.getMessage()+"");
+                                }
+                            }
+                        });
+                    }
+                });
+        }
+    }
+
+    private void goMemberMenu(){
+        Intent intent = new Intent(this, ActivityParticipant.class);
+        intent.putExtra("chatUrl", chatUrl);
+        intent.putExtra("type", type);
+        startActivity(intent);
     }
 }

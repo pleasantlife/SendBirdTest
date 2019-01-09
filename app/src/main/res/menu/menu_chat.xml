@@ -3,4 +3,7 @@
     <item android:id="@+id/chatOutMenu"
         android:title="나가기">
     </item>
+    <item android:id="@+id/chatMemberMenu"
+        android:title="참여멤버">
+    </item>
 </menu>
