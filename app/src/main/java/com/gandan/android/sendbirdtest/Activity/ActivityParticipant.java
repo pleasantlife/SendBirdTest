@@ -2,8 +2,11 @@ package com.gandan.android.sendbirdtest.Activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import com.gandan.android.sendbirdtest.Adapter.ParticipantRecyclerAdapter;
 import com.gandan.android.sendbirdtest.R;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.GroupChannel;
@@ -15,13 +18,17 @@ import com.sendbird.android.SendBirdException;
 import com.sendbird.android.User;
 import com.sendbird.android.UserListQuery;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityParticipant extends AppCompatActivity {
 
 
+    RecyclerView recyclerParticipant;
+    ParticipantRecyclerAdapter participantRecyclerAdapter;
     String chatUrl = "";
     String type = "";
+    List<User> userList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +37,10 @@ public class ActivityParticipant extends AppCompatActivity {
 
         chatUrl = getIntent().getStringExtra("chatUrl");
         type = getIntent().getStringExtra("type");
+
+        recyclerParticipant = findViewById(R.id.recyclerParticipant);
+        recyclerParticipant.setLayoutManager(new LinearLayoutManager(this));
+        participantRecyclerAdapter = new ParticipantRecyclerAdapter(this, userList);
 
 
         if(!"".equals(chatUrl)){
@@ -45,8 +56,10 @@ public class ActivityParticipant extends AppCompatActivity {
                                     public void onResult(List<User> list, SendBirdException e) {
                                         if (e == null){
                                             for(User user : list){
+                                                userList.add(user);
                                                 Log.e("participant", user.getUserId()+"");
                                             }
+                                            participantRecyclerAdapter.notifyDataSetChanged();
                                         } else {
                                             Log.e("errorParti", e.getMessage()+"");
                                         }
