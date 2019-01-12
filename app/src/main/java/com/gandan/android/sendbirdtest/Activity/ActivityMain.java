@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gandan.android.sendbirdtest.Adapter.ChannelRecyclerAdapter;
@@ -37,12 +38,23 @@ public class ActivityMain extends AppCompatActivity {
     User connectUser;
     MakeChatDialog makeChatDialog;
     SwipeRefreshLayout swipeList;
+    TextView noRoomTxtView;
+    ChannelRecyclerAdapter.DeleteListener deleteListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        deleteListener = new ChannelRecyclerAdapter.DeleteListener() {
+            @Override
+            public void onDelete() {
+                Toast.makeText(ActivityMain.this, "Room deleted.", Toast.LENGTH_SHORT).show();
+                getGroupChannelList();
+            }
+        };
+
+        noRoomTxtView = findViewById(R.id.noRoomTxtView);
         channelRecyclerView = findViewById(R.id.channelRecyclerView);
 
         makeOpenChatBtn = findViewById(R.id.makeOpenChatBtn);
@@ -115,6 +127,7 @@ public class ActivityMain extends AppCompatActivity {
                 makeChatDialog.show();
             }
         });
+
 
 
     }
@@ -200,12 +213,17 @@ public class ActivityMain extends AppCompatActivity {
     }
 
     private void setRecyclerView(){
-        channelRecyclerAdapter = new ChannelRecyclerAdapter(this, channelList, connectUser.getUserId());
+        channelRecyclerAdapter = new ChannelRecyclerAdapter(this, channelList, connectUser.getUserId(), deleteListener);
         channelRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         channelRecyclerView.setAdapter(channelRecyclerAdapter);
         channelRecyclerAdapter.notifyDataSetChanged();
         if(swipeList.isRefreshing()){
             swipeList.setRefreshing(false);
+        }
+        if( channelList.size() == 0 ) {
+            noRoomTxtView.setVisibility(View.VISIBLE);
+        } else {
+            noRoomTxtView.setVisibility(View.GONE);
         }
     }
 
