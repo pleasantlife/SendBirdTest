@@ -41,7 +41,7 @@ public class ActivityParticipant extends AppCompatActivity {
         recyclerParticipant = findViewById(R.id.recyclerParticipant);
         recyclerParticipant.setLayoutManager(new LinearLayoutManager(this));
         participantRecyclerAdapter = new ParticipantRecyclerAdapter(this, userList);
-
+        recyclerParticipant.setAdapter(participantRecyclerAdapter);
 
         if(!"".equals(chatUrl)){
             switch(type){
@@ -59,6 +59,7 @@ public class ActivityParticipant extends AppCompatActivity {
                                                 userList.add(user);
                                                 Log.e("participant", user.getUserId()+"");
                                             }
+
                                             participantRecyclerAdapter.notifyDataSetChanged();
                                         } else {
                                             Log.e("errorParti", e.getMessage()+"");
@@ -82,8 +83,11 @@ public class ActivityParticipant extends AppCompatActivity {
                                     public void onResult(List<Member> list, SendBirdException e) {
                                         if(e == null){
                                             for(Member member : list){
+                                                //Member는 User를 상속받았음.
+                                                userList.add(member);
                                                 Log.e("member", member.getUserId()+"");
                                             }
+                                            participantRecyclerAdapter.notifyDataSetChanged();
                                         } else {
                                             Log.e("errorG", e.getMessage()+"");
                                         }

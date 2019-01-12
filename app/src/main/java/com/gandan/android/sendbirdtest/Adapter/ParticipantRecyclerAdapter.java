@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.gandan.android.sendbirdtest.R;
 import com.sendbird.android.User;
 
 import java.util.List;
@@ -25,13 +26,19 @@ public class ParticipantRecyclerAdapter extends RecyclerView.Adapter<Participant
     @NonNull
     @Override
     public ParticipantRecyclerHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_participant, parent, false);
         return new ParticipantRecyclerHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ParticipantRecyclerHolder holder, int position) {
-
+        User user = userList.get(position);
+        holder.memberIdTxtView.setText(user.getUserId()+"");
+        if(user.getConnectionStatus().equals(User.ConnectionStatus.ONLINE)){
+            holder.memberOnlineTxtView.setText("Online");
+        } else {
+            holder.memberOnlineTxtView.setText("Offline");
+        }
     }
 
     @Override
@@ -41,12 +48,13 @@ public class ParticipantRecyclerAdapter extends RecyclerView.Adapter<Participant
 
     public class ParticipantRecyclerHolder extends RecyclerView.ViewHolder {
 
-        TextView text1;
+        TextView memberIdTxtView, memberOnlineTxtView;
 
         public ParticipantRecyclerHolder(View itemView) {
             super(itemView);
 
-            text1 = itemView.findViewById(android.R.id.text1);
+            memberIdTxtView = itemView.findViewById(R.id.memberIdTxtview);
+            memberOnlineTxtView = itemView.findViewById(R.id.memberOnlineTxtVIew);
         }
     }
 }

@@ -45,6 +45,8 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
             UserMessage beforeMessage = (UserMessage) baseMessageList.get(position-1);
             if(sdf.format(beforeMessage.getCreatedAt()).equals(sdf.format(message.getCreatedAt()))){
                 holder.chatTimeTxtView.setVisibility(View.GONE);
+            } else {
+                holder.chatTimeTxtView.setVisibility(View.VISIBLE);
             }
         }
     }
