@@ -111,6 +111,7 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
             @Override
             public void onResult(SendBirdException e) {
                 if( e == null){
+                    Log.e("Deleted", "room");
                     deleteListener.onDelete();
                     if(alertDialog.isShowing()){
                         alertDialog.dismiss();

@@ -1,5 +1,6 @@
 package com.gandan.android.sendbirdtest.Activity;
 
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -49,8 +50,7 @@ public class ActivityMain extends AppCompatActivity {
         deleteListener = new ChannelRecyclerAdapter.DeleteListener() {
             @Override
             public void onDelete() {
-                Toast.makeText(ActivityMain.this, "Room deleted.", Toast.LENGTH_SHORT).show();
-                getGroupChannelList();
+                reload();
             }
         };
 
@@ -143,6 +143,15 @@ public class ActivityMain extends AppCompatActivity {
                 } else {
                     Log.e("makeOpenErr", e.getMessage()+"");
                 }
+            }
+        });
+    }
+
+    private void reload(){
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getGroupChannelList();
             }
         });
     }

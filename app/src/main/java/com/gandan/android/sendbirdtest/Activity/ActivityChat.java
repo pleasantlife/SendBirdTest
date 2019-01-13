@@ -24,6 +24,7 @@ import com.sendbird.android.GroupChannel;
 import com.sendbird.android.OpenChannel;
 import com.sendbird.android.ParticipantListQuery;
 import com.sendbird.android.PreviousMessageListQuery;
+import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
 import com.sendbird.android.UserMessage;
 
@@ -121,6 +122,15 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+
+        //Receive new Message and locate to 0 in list
+        SendBird.addChannelHandler(userId, new SendBird.ChannelHandler() {
+            @Override
+            public void onMessageReceived(BaseChannel baseChannel, BaseMessage baseMessage) {
+                messageList.add(0, baseMessage);
+                chatRecyclerAdapter.notifyDataSetChanged();
+            }
+        });
 
     }
 
