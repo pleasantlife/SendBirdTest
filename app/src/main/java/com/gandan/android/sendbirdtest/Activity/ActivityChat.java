@@ -60,7 +60,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
         chatRecycler = findViewById(R.id.chatRecycler);
         linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true);
         chatRecycler.setLayoutManager(linearLayoutManager);
-        chatRecyclerAdapter = new ChatRecyclerAdapter(this, messageList);
+        chatRecyclerAdapter = new ChatRecyclerAdapter(this, messageList, userId);
         chatRecycler.setAdapter(chatRecyclerAdapter);
         sendBtn = findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(this);

@@ -4,9 +4,11 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.gandan.android.sendbirdtest.R;
@@ -22,10 +24,12 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
     Context context;
     List<BaseMessage> baseMessageList;
+    String userid;
 
-    public ChatRecyclerAdapter(Context context, List<BaseMessage> baseMessageList){
+    public ChatRecyclerAdapter(Context context, List<BaseMessage> baseMessageList, String userId){
         this.context = context;
         this.baseMessageList = baseMessageList;
+        this.userid = userId;
     }
 
     @NonNull
@@ -46,6 +50,16 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
             if(sdf.format(beforeMessage.getCreatedAt()).equals(sdf.format(message.getCreatedAt()))){
                 holder.chatTimeTxtView.setVisibility(View.GONE);
             } else {
+                holder.chatTimeTxtView.setVisibility(View.VISIBLE);
+            }
+
+            if(!message.getSender().getUserId().equals(userid)){
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                lp.weight = 1.0f;
+                lp.gravity = Gravity.LEFT;
+                lp.topMargin = 24;
+                holder.chatTxtView.setLayoutParams(lp);
+                holder.chatTimeTxtView.setLayoutParams(lp);
                 holder.chatTimeTxtView.setVisibility(View.VISIBLE);
             }
         }
