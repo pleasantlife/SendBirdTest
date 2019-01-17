@@ -179,7 +179,7 @@ public class ActivityChat extends AppCompatActivity implements View.OnClickListe
                     for ( BaseMessage msg : list){
                         messageList.add(0, msg);
                     }
-                    chatRecyclerAdapter.notifyDataSetChanged();
+                    chatRecyclerAdapter.notifyItemInserted(0);
                 } else {
                     Log.e("newE", e.getMessage()+"");
                 }

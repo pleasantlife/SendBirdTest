@@ -43,14 +43,16 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull ChatHolder holder, int position) {
         UserMessage message = (UserMessage) baseMessageList.get(position);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
         holder.chatSenderTxtView.setText(message.getSender().getUserId()+"");
         holder.chatTxtView.setText(message.getMessage()+"");
         holder.chatTimeTxtView.setText(sdf.format(message.getCreatedAt()));
         holder.chatDateTxtView.setText(dateFormat.format(message.getCreatedAt()));
-        if(position > 0) {
-            UserMessage beforeMessage = (UserMessage) baseMessageList.get(position-1);
+        if(position < baseMessageList.size()-1) {
+            UserMessage beforeMessage = (UserMessage) baseMessageList.get(position+1);
             if(sdf.format(beforeMessage.getCreatedAt()).equals(sdf.format(message.getCreatedAt()))){
                 holder.chatTimeTxtView.setVisibility(View.GONE);
             } else {
@@ -64,23 +66,42 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
 
             if(!message.getSender().getUserId().equals(userid)){
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                lp.weight = 1.0f;
-                lp.gravity = Gravity.LEFT;
-                lp.topMargin = 24;
-                holder.chatTxtView.setLayoutParams(lp);
-                holder.chatTimeTxtView.setLayoutParams(lp);
-                holder.chatSenderTxtView.setLayoutParams(lp);
+                notMyMessageView(holder, lp);
             } else {
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                lp.weight = 1.0f;
-                lp.gravity = Gravity.RIGHT;
-                lp.topMargin = 24;
-                holder.chatSenderTxtView.setLayoutParams(lp);
-                holder.chatTxtView.setLayoutParams(lp);
-                holder.chatTimeTxtView.setLayoutParams(lp);
+                myMessageView(holder, lp);
             }
+        } else {
+            /*UserMessage nextMessage = (UserMessage) baseMessageList.get(position+1);
+            if(!dateFormat.format(nextMessage.getCreatedAt()).equals(dateFormat.format(message.getCreatedAt()))){
+                holder.chatDateTxtView.setVisibility(View.VISIBLE);
+            } else {
+                holder.chatDateTxtView.setVisibility(View.GONE);
+            }
+            if(!nextMessage.getSender().getUserId().equals(message.getSender().getUserId())){
+                notMyMessageView(holder, lp);
+            } else {
+                myMessageView(holder, lp);
+            }*/
         }
+    }
+
+    private void myMessageView(ChatHolder holder, LinearLayout.LayoutParams layoutParams) {
+        holder.chatSenderTxtView.setVisibility(View.GONE);
+        layoutParams.weight = 1.0f;
+        layoutParams.gravity = Gravity.RIGHT;
+        layoutParams.topMargin = 24;
+        holder.chatSenderTxtView.setLayoutParams(layoutParams);
+        holder.chatTxtView.setLayoutParams(layoutParams);
+        holder.chatTimeTxtView.setLayoutParams(layoutParams);
+    }
+
+    private void notMyMessageView(ChatHolder holder, LinearLayout.LayoutParams layoutParams){
+        layoutParams.weight = 1.0f;
+        layoutParams.gravity = Gravity.LEFT;
+        layoutParams.topMargin = 24;
+        holder.chatSenderTxtView.setLayoutParams(layoutParams);
+        holder.chatTxtView.setLayoutParams(layoutParams);
+        holder.chatTimeTxtView.setLayoutParams(layoutParams);
     }
 
     @Override
