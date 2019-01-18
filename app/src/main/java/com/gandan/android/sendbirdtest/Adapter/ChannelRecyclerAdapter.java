@@ -27,7 +27,6 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
     Context context;
     List<BaseChannel> baseChannelList;
     String userId = "";
-    int size = 0;
     AlertDialog alertDialog;
     DeleteListener deleteListener;
 
@@ -38,7 +37,6 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
     public ChannelRecyclerAdapter(Context context, List<BaseChannel> baseChannelList, String userId, DeleteListener deleteListener){
         this.context = context;
         this.baseChannelList = baseChannelList;
-        this.size = baseChannelList.size();
         this.userId = userId;
         this.deleteListener = deleteListener;
     }
@@ -59,19 +57,11 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
             @Override
             public void onClick(View v) {
                 if(baseChannel.isOpenChannel()){
-                    Intent intent = new Intent(context, ActivityChat.class);
-                    intent.putExtra("type", "open");
-                    intent.putExtra("chatUrl", baseChannel.getUrl()+"");
-                    intent.putExtra("userId", userId);
-                    context.startActivity(intent);
+                    goChat(baseChannel, "open");
                 } else if (baseChannel.isGroupChannel()){
-                    Intent intent = new Intent(context, ActivityChat.class);
-                    intent.putExtra("type", "group");
-                    intent.putExtra("chatUrl", baseChannel.getUrl()+"");
-                    intent.putExtra("userId", userId);
-                    context.startActivity(intent);
+                    goChat(baseChannel, "group");
                 } else {
-                    Toast.makeText(context, "What the...?!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Can't find channel information.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -103,7 +93,15 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
 
     @Override
     public int getItemCount() {
-        return size;
+        return baseChannelList.size();
+    }
+
+    private void goChat(BaseChannel baseChannel, String type){
+        Intent intent = new Intent(context, ActivityChat.class);
+        intent.putExtra("type", type);
+        intent.putExtra("chatUrl", baseChannel.getUrl()+"");
+        intent.putExtra("userId", userId);
+        context.startActivity(intent);
     }
 
     private void deleteRoom(OpenChannel openChannel){
@@ -130,7 +128,6 @@ public class ChannelRecyclerAdapter extends RecyclerView.Adapter<ChannelRecycler
 
         public ChannelRecyclerHolder(View itemView) {
             super(itemView);
-
             text1 = itemView.findViewById(android.R.id.text1);
         }
     }
