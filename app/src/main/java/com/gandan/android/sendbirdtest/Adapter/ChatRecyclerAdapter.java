@@ -47,62 +47,70 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+        Log.e("message", "Number :"+position + " : " + message.getMessage());
         holder.chatSenderTxtView.setText(message.getSender().getUserId()+"");
         holder.chatTxtView.setText(message.getMessage()+"");
-        holder.chatTimeTxtView.setText(sdf.format(message.getCreatedAt()));
+        holder.chatTimeTxtView.setText(sdf.format(message.getCreatedAt()).split(" ")[1]);
         holder.chatDateTxtView.setText(dateFormat.format(message.getCreatedAt()));
-        if(position < baseMessageList.size()-1) {
-            UserMessage beforeMessage = (UserMessage) baseMessageList.get(position+1);
-            if(sdf.format(beforeMessage.getCreatedAt()).equals(sdf.format(message.getCreatedAt()))){
-                holder.chatTimeTxtView.setVisibility(View.GONE);
-            } else {
-                holder.chatTimeTxtView.setVisibility(View.VISIBLE);
-            }
-            if(!dateFormat.format(beforeMessage.getCreatedAt()).equals(dateFormat.format(message.getCreatedAt()))){
+
+        //나의 메세지
+        if(message.getSender().getUserId().equals(userid)){
+            if(position == baseMessageList.size()-1){
                 holder.chatDateTxtView.setVisibility(View.VISIBLE);
             } else {
-                holder.chatDateTxtView.setVisibility(View.GONE);
+                UserMessage previousMessage = (UserMessage) baseMessageList.get(position+1);
+                //일자가 같을 경우
+                if(dateFormat.format(previousMessage.getCreatedAt()).equals(dateFormat.format(message.getCreatedAt()))){
+                    holder.chatDateTxtView.setVisibility(View.INVISIBLE);
+                }
+                //일자가 다를 경우
+                else {
+                    holder.chatDateTxtView.setVisibility(View.VISIBLE);
+                }
             }
-
-
-            if(!message.getSender().getUserId().equals(userid)){
-                notMyMessageView(holder, lp);
-            } else {
-                myMessageView(holder, lp);
-            }
-        } else {
-            /*UserMessage nextMessage = (UserMessage) baseMessageList.get(position+1);
-            if(!dateFormat.format(nextMessage.getCreatedAt()).equals(dateFormat.format(message.getCreatedAt()))){
+            //우측정렬
+            lp.gravity = Gravity.RIGHT;
+            holder.chatSenderTxtView.setVisibility(View.GONE);
+            holder.chatTxtView.setLayoutParams(lp);
+            holder.chatTimeTxtView.setLayoutParams(lp);
+        }
+        //다른 사람의 메세지
+        else {
+            //(불러온 메세지들 중에) 가장 예전 메세지 ==> 가장 윗 자리를 차지하게 됨.
+            if(position == baseMessageList.size()-1){
+                holder.chatSenderTxtView.setVisibility(View.VISIBLE);
                 holder.chatDateTxtView.setVisibility(View.VISIBLE);
-            } else {
-                holder.chatDateTxtView.setVisibility(View.GONE);
             }
-            if(!nextMessage.getSender().getUserId().equals(message.getSender().getUserId())){
-                notMyMessageView(holder, lp);
-            } else {
-                myMessageView(holder, lp);
-            }*/
+            //그 이외의 메세지 ==> 메세지의 직전 메세지를 확인!
+            else {
+                UserMessage previousMessage = (UserMessage) baseMessageList.get(position+1);
+                String previousId = previousMessage.getSender().getUserId();
+                //직전 발신자가 같을 경우
+                if(previousId.equals(message.getSender().getUserId())){
+                    holder.chatSenderTxtView.setVisibility(View.INVISIBLE);
+                }
+                //직전 발신자가 다를 경우
+                else {
+                    holder.chatSenderTxtView.setVisibility(View.VISIBLE);
+                }
+                //일자가 같을 경우
+                if(dateFormat.format(previousMessage.getCreatedAt()).equals(dateFormat.format(message.getCreatedAt()))){
+                    holder.chatDateTxtView.setVisibility(View.INVISIBLE);
+                }
+                //일자가 다를 경우
+                else {
+                    holder.chatDateTxtView.setVisibility(View.VISIBLE);
+                }
+
+            }
+            //좌측정렬
+            lp.gravity = Gravity.LEFT;
+            holder.chatSenderTxtView.setLayoutParams(lp);
+            holder.chatTxtView.setLayoutParams(lp);
+            holder.chatTimeTxtView.setLayoutParams(lp);
         }
     }
 
-    private void myMessageView(ChatHolder holder, LinearLayout.LayoutParams layoutParams) {
-        holder.chatSenderTxtView.setVisibility(View.GONE);
-        layoutParams.weight = 1.0f;
-        layoutParams.gravity = Gravity.RIGHT;
-        layoutParams.topMargin = 24;
-        holder.chatSenderTxtView.setLayoutParams(layoutParams);
-        holder.chatTxtView.setLayoutParams(layoutParams);
-        holder.chatTimeTxtView.setLayoutParams(layoutParams);
-    }
-
-    private void notMyMessageView(ChatHolder holder, LinearLayout.LayoutParams layoutParams){
-        layoutParams.weight = 1.0f;
-        layoutParams.gravity = Gravity.LEFT;
-        layoutParams.topMargin = 24;
-        holder.chatSenderTxtView.setLayoutParams(layoutParams);
-        holder.chatTxtView.setLayoutParams(layoutParams);
-        holder.chatTimeTxtView.setLayoutParams(layoutParams);
-    }
 
     @Override
     public int getItemCount() {
