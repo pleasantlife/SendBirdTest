@@ -3,11 +3,15 @@ package com.gandan.android.sendbirdtest.Activity;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +21,7 @@ import android.widget.Toast;
 import com.gandan.android.sendbirdtest.Adapter.ChannelRecyclerAdapter;
 import com.gandan.android.sendbirdtest.Dialog.MakeChatDialog;
 import com.gandan.android.sendbirdtest.R;
+import com.sendbird.android.ApplicationUserListQuery;
 import com.sendbird.android.BaseChannel;
 import com.sendbird.android.GroupChannel;
 import com.sendbird.android.GroupChannelListQuery;
@@ -25,6 +30,7 @@ import com.sendbird.android.OpenChannelListQuery;
 import com.sendbird.android.SendBird;
 import com.sendbird.android.SendBirdException;
 import com.sendbird.android.User;
+import com.sendbird.android.UserListQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +47,14 @@ public class ActivityMain extends AppCompatActivity {
     SwipeRefreshLayout swipeList;
     TextView noRoomTxtView;
     ChannelRecyclerAdapter.DeleteListener deleteListener;
+    ActionBar actionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        actionBar = getSupportActionBar();
 
         deleteListener = new ChannelRecyclerAdapter.DeleteListener() {
             @Override
@@ -129,6 +138,42 @@ public class ActivityMain extends AppCompatActivity {
         });
 
 
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_participant, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.participantMenu:
+                getMember();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    //Application에 접속한 사람들의 리스트를 가져온다.
+    private void getMember(){
+        ApplicationUserListQuery applicationUserListQuery = SendBird.createApplicationUserListQuery();
+        applicationUserListQuery.next(new UserListQuery.UserListQueryResultHandler() {
+            @Override
+            public void onResult(List<User> list, SendBirdException e) {
+                if(e == null){
+                    for(User user : list){
+                        Log.e("userList", user.getUserId()+"");
+                    }
+                } else {
+                    Log.e("msgE", e.getMessage()+"");
+                }
+            }
+        });
 
     }
 
