@@ -1,5 +1,6 @@
 package com.gandan.android.sendbirdtest.Activity;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gandan.android.sendbirdtest.Adapter.ChannelRecyclerAdapter;
+import com.gandan.android.sendbirdtest.Adapter.ParticipantRecyclerAdapter;
 import com.gandan.android.sendbirdtest.Dialog.MakeChatDialog;
 import com.gandan.android.sendbirdtest.R;
 import com.sendbird.android.ApplicationUserListQuery;
@@ -166,9 +168,8 @@ public class ActivityMain extends AppCompatActivity {
             @Override
             public void onResult(List<User> list, SendBirdException e) {
                 if(e == null){
-                    for(User user : list){
-                        Log.e("userList", user.getUserId()+"");
-                    }
+                    Intent intent = new Intent(ActivityMain.this, ActivityParticipant.class);
+                    startActivity(intent);
                 } else {
                     Log.e("msgE", e.getMessage()+"");
                 }

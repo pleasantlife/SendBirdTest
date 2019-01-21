@@ -42,7 +42,7 @@ public class ActivityParticipant extends AppCompatActivity {
         recyclerParticipant.setLayoutManager(new LinearLayoutManager(this));
         participantRecyclerAdapter = new ParticipantRecyclerAdapter(this, userList);
         recyclerParticipant.setAdapter(participantRecyclerAdapter);
-
+        
         if(!"".equals(chatUrl)){
             switch(type){
                 case "open":
